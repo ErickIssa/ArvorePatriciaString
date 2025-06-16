@@ -1,147 +1,130 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h> 
-#include <sys/time.h>
 #include "patricia.h"
+#include <stdio.h>
+#include <string.h>
 
-void InicializaPatricia(TipoArvore* arvoreInicial){
-  *arvoreInicial = NULL;
+void InicializaPatricia(TipoArvore* arvoreInicial) {
+    *arvoreInicial = NULL;
 }
 
-char Caractere(short i, String k) {
-  size_t len = strlen(k);
-  if (i >= (short)len) 
-      return '\0';
-  return k[i];
+int PosicaoQueDifere(String s1, String s2) {
+    int i = 0;
+    while (s1[i] != '\0' && s2[i] != '\0') {
+        if (s1[i] != s2[i]) {
+            return i;  // Posicao que difere
+        }
+        i++;
+    }
+    // solucao pra prefixo
+    if (s1[i] != s2[i]) {
+        return i;
+    }
+    return -1;  // palavra igaul
 }
 
-boolean MenorIgual(char a, char b){
-    return a <= b ? TRUE : FALSE;
+char MaiorLetraEntreStrings(String s1, String s2) {
+    int i = 0;
+    while (s1[i] != '\0' && s2[i] != '\0') {
+        if (s1[i] != s2[i]) {
+            if (s1[i] > s2[i]) {
+                return s1[i];
+            } else {
+                return s2[i];
+            }
+        }
+        i++;
+    }
+    if (s1[i] != '\0') {
+        return s1[i];
+    }
+    if (s2[i] != '\0') {
+        return s2[i];
+    }
+    return '!';
 }
 
-boolean EExterno(TipoArvore p)
-{
-    /* Verifica se p^ e nó externo */
-    return (p->nt == Externo)?TRUE:FALSE;
+int Bit(int i, String k, char referencia) {
+    int lenK = strlen(k);
+    char ck;
+    if (i < lenK) {
+        ck = k[i];
+    } else {
+        ck = '\0';  // Simula fim de string
+    }
+
+    if (ck <= referencia) {
+        return 0;  // Vai para esquerda
+    } else {
+        return 1;  // Vai para direita
+    }
 }
 
-TipoArvore CriaNoInt(int i, TipoArvore *Esq, TipoArvore *Dir, char CaractereRecebido) {
-  TipoArvore p = (TipoArvore)malloc(sizeof(TipoPatNo));
-  if (p == NULL) {
-    fprintf(stderr, "Erro de alocação em CriaNoInt\n");
-    exit(EXIT_FAILURE);
-  }
-  p->nt = Interno;
+
+short EExterno(TipoArvore p)
+{ /* Verifica se p^ e nodo externo */
+  return (p->nt == Externo);
+}
+
+TipoArvore CriaNoInt(int indice,char caractereDif, TipoArvore *Esq,  TipoArvore *Dir){ TipoArvore p;
+  p = (TipoArvore)malloc(sizeof(TipoPatNo));
+  p->nt = Interno; 
   p->NO.NInterno.Esq = *Esq;
-  p->NO.NInterno.Dir = *Dir;
-  p->NO.NInterno.Index = i;
-  p->NO.NInterno.caractere = CaractereRecebido; //adaptado para receber o caractere de string na patricia
+  p->NO.NInterno.Dir = *Dir; 
+  p->NO.NInterno.Index = indice;
+  p->NO.NInterno.caractere =  caractereDif;
   return p;
-} 
+}
 
-TipoArvore CriaNoExt(String k) {
-  TipoArvore p = (TipoArvore)malloc(sizeof(TipoPatNo));
-  if (p == NULL) {
-    fprintf(stderr, "Erro de alocação em CriaNoExt\n");
-    exit(EXIT_FAILURE);
-  }
-  p->nt = Externo;
-  p->NO.Chave = k;
+TipoArvore CriaNoExt(String palavra)
+{ TipoArvore p;
+  p = (TipoArvore)malloc(sizeof(TipoPatNo));
+  p->nt = Externo; 
+  strcpy(p->NO.Chave,palavra);
   return p;
 }  
 
-void Pesquisa(String k, TipoArvore t) {
-    if (!t) {
-        printf("Elemento nao encontrado\n");
-        return;
-    }
-    if (EExterno(t)) {
-        printf(strcmp(k, t->NO.Chave) == 0
-               ? "Elemento encontrado\n"
-               : "Elemento nao encontrado\n");
-        return;
-    }
-    char c = Caractere(t->NO.NInterno.Index, k);
-    if (c < t->NO.NInterno.caractere)
-        Pesquisa(k, t->NO.NInterno.Esq);
-    else
-        Pesquisa(k, t->NO.NInterno.Dir);
-}
-
-
-TipoArvore InsereEntre(String k, TipoArvore *t, short i) {
-    char c_nova    = Caractere(i, k);
-    char c_exist   = EExterno(*t)
-                     ? Caractere(i, (*t)->NO.Chave)
-                     : (*t)->NO.NInterno.caractere;
-    char pivo      = (c_nova < c_exist) ? c_nova : c_exist;
-    TipoArvore ext = CriaNoExt(k);
-
-    // só <, nunca <=
-    if (EExterno(*t) || i < (*t)->NO.NInterno.Index) {
-        if (c_nova < c_exist)
-            return CriaNoInt(i, &ext, t, pivo);
-        else
-            return CriaNoInt(i, t, &ext, pivo);
-    }
-
-    // descida normal usando < também
-    if (c_nova < (*t)->NO.NInterno.caractere)
-        (*t)->NO.NInterno.Esq = InsereEntre(k, &(*t)->NO.NInterno.Esq, i);
-    else
-        (*t)->NO.NInterno.Dir = InsereEntre(k, &(*t)->NO.NInterno.Dir, i);
-
-    return *t;
-}
-
-
-TipoArvore Insere(String k, TipoArvore *t) {
-    TipoArvore p = *t;
-    int i = 0;
-
-    if (p == NULL)
-        return CriaNoExt(k);
-
-    // desce até externo
-   while (!EExterno(p)) {
-        char c = Caractere(p->NO.NInterno.Index, k);
-        if (c < p->NO.NInterno.caractere)
-            p = p->NO.NInterno.Esq;
-        else
-            p = p->NO.NInterno.Dir;
+TipoArvore Insere(String palavra, TipoArvore *t)
+{ TipoArvore p;
+  int i;
+  if (*t == NULL) 
+  return (CriaNoExt(palavra));
+  else 
+  { p = *t;
+    while (!EExterno(p)) 
+      { if (Bit(p->NO.NInterno.Index, palavra, p->NO.NInterno.caractere) == 1)
+        p = p->NO.NInterno.Dir;
+        else p = p->NO.NInterno.Esq;
+      }
+    /* acha o primeiro bit diferente */
+    i = 0;
+    while (palavra[i] == p->NO.Chave[i] && palavra[i] != '\0') 
+      i++;
+    if (strcmp(palavra, p->NO.Chave) == 0)
+    { printf("Erro: chave ja esta na arvore\n");  
+      return (*t); } 
+    else  
+      return (InsereEntre(palavra, t, i));
   }
-    // busca primeiro bit diferente, mas pára no '\0'
-    while (Caractere(i, k) == Caractere(i, p->NO.Chave) 
-           && Caractere(i, k) != '\0') {
-        i++;
-    }
-
-    // se chegaram juntos ao terminador, é duplicata
-    if (Caractere(i, k) == '\0' && Caractere(i, p->NO.Chave) == '\0') {
-        printf("Erro: chave já está na árvore: %s\n", k);
-        return *t;
-    }
-
-    // cria o nó interno no bit i
-    return InsereEntre(k, t, i);
 }
 
-
-void printNo(TipoArvore no)
+TipoArvore InsereEntre(String k, TipoArvore *t, int i)
 {
-    if(no == NULL)
-        printf("No Nulo\n");
-    else if(no->nt == Externo){
-        printf("Chave:%s\n",no->NO.Chave);
-    }
-}
+    TipoArvore p;
+    if (EExterno(*t) || i < (*t)->NO.NInterno.Index) {
+        p = CriaNoExt(k);
+        char letraRef = k[i];  //caractere da palavra na posição de diferença
 
-void ImprimePatriciaOrdem(TipoArvore ap) {
-    if (!ap) return;
-    if (EExterno(ap)) {
-        printf("Chave:%s\n", ap->NO.Chave);
+        if (Bit(i, k, letraRef) == 1)
+            return CriaNoInt(i, letraRef, t, &p);
+        else
+            return CriaNoInt(i, letraRef, &p, t);
     } else {
-        ImprimePatriciaOrdem(ap->NO.NInterno.Esq);
-        ImprimePatriciaOrdem(ap->NO.NInterno.Dir);
+        int idx = (*t)->NO.NInterno.Index;
+        char letraRef = (*t)->NO.NInterno.caractere;
+
+        if (Bit(idx, k, letraRef) == 1)
+            (*t)->NO.NInterno.Dir = InsereEntre(k, &(*t)->NO.NInterno.Dir, i);
+        else
+            (*t)->NO.NInterno.Esq = InsereEntre(k, &(*t)->NO.NInterno.Esq, i);
+        return (*t);
     }
 }
