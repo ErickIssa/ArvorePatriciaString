@@ -73,7 +73,7 @@ int main() {
     InicializaPatricia(&ArvoreInicial);
 
     // Abre o arquivo "entrada.txt"
-    arquivo = fopen("entrada.txt", "r");
+    arquivo = fopen("entrada5.txt", "r");
 
     if (arquivo == NULL) {
         perror("Erro ao abrir o arquivo");
@@ -87,7 +87,7 @@ int main() {
         char *token = strtok(linha, " ");
         while (token != NULL && i < MAX_PALAVRAS) {
             // Only copy words with more than 3 characters
-            if (strlen(token) > 3) {
+            if (strlen(token) > 2) {
                 strncpy(palavras[i], token, TAM_PALAVRA - 1);
                 palavras[i][TAM_PALAVRA - 1] = '\0'; // Garante terminação
                 i++;
@@ -106,8 +106,8 @@ int main() {
     for (int j = 0; j < i; j++) {
         printf("palavras[%d] = %s\n", j, palavras[j]);
         ArvoreInicial = Insere(palavras[j],&ArvoreInicial);
-         ImprimeArvore(ArvoreInicial);
-         printf("\n");
+        //  ImprimeArvore(ArvoreInicial);
+        //  printf("\n");
     }
 
     char pessq[50], pesq2[50];

@@ -51,7 +51,7 @@ int Bit(int i, String k, char referencia) {
         ck = '\0';  // Simula fim de string
     }
 
-    if (ck <= referencia) {
+    if (ck < referencia) {
         return 0;  // Vai para esquerda
     } else {
         return 1;  // Vai para direita
@@ -64,7 +64,8 @@ short EExterno(TipoArvore p)
   return (p->nt == Externo);
 }
 
-TipoArvore CriaNoInt(int indice,char caractereDif, TipoArvore *Esq,  TipoArvore *Dir){ TipoArvore p;
+TipoArvore CriaNoInt(int indice,char caractereDif, TipoArvore *Esq,  TipoArvore *Dir){ 
+  TipoArvore p;
   p = (TipoArvore)malloc(sizeof(TipoPatNo));
   p->nt = Interno; 
   p->NO.NInterno.Esq = *Esq;
@@ -111,7 +112,7 @@ TipoArvore InsereEntre(String k, TipoArvore *t, int i)
     TipoArvore p;
     if (EExterno(*t) || i < (*t)->NO.NInterno.Index) {
         p = CriaNoExt(k);
-        char letraRef = k[i];  //caractere da palavra na posição de diferença
+        char letraRef = MaiorLetraEntreStrings(k,(*t)->NO.Chave);//caractere da palavra na posição de diferença
 
         if (Bit(i, k, letraRef) == 1)
             return CriaNoInt(i, letraRef, t, &p);
