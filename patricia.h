@@ -1,50 +1,61 @@
-
- // Adaptado de: Arvore-Patricia - GitHub/FurlanV (https://github.com/FurlanV/Arvore-Patricia/blob/master/Patricia.c)
-
-#ifndef TIPOPAT_H
-#define TIPOPAT_H
+#ifndef PATRICIA_H
+#define PATRICIA_H
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <string.h>
+#define D 15
+#define TAM_MAX 50
+//struct lista ENCADEADEADA DE OCORRENCIAS
+typedef struct CelulaOcorrencias *ApontadorIndice;
+typedef struct CelulaOcorrencias{
+  int numeroOcorrencias;
+  int idDoc;
+  ApontadorIndice Prox;
+}CelulaOcorrencias;
 
-#define D 8   /* depende de TipoChave */
-#define TRUE 1
-#define FALSE !TRUE
-
-typedef char *String;      /* a definir, dependendo da aplicacao */
-typedef  short boolean;
+typedef struct {
+  ApontadorIndice Primeiro, Ultimo;
+} TipoLista;
 
 
-typedef enum {
-  Interno, Externo
-} TipoDoNo;
+void FLVaziaEncadeada(TipoLista *Lista);
+int VerificaVaziaEncadeada(TipoLista Lista);
+void InsereEncadeada(int idoc,int nmrOcorrencias, TipoLista *Lista);
+void ImprimeEncadeada(TipoLista Lista);
+
+//STRUCTS DA PATRICIA
+typedef char String[TAM_MAX];
+typedef short boolean;
+
+typedef enum { Interno, Externo } TipoDoNo;
 
 typedef struct TipoPatNo* TipoArvore;
-
 typedef struct TipoPatNo {
   TipoDoNo nt;
-    union {
-      struct {
-        short Index;
-        char caractere; // caractete a ser comparado
-        TipoArvore Esq, Dir;
-      } NInterno;
+  union {
+    struct {
+      int Index;          // índice do caractere onde diverge
+      char caractere;     // caractere armazenado no nó interno (maior)
+      TipoArvore Esq, Dir;
+    } NInterno;
     String Chave;
+    TipoLista ocorrenciasPalavra;         // palavra armazenada no nó externo
   } NO;
 } TipoPatNo;
 
 
-void InicializaPatricia(TipoArvore *arvoreInicial);
-char Caractere(short i, String k);
+int PosicaoQueDifere(String s1, String s2);
+char MaiorLetraEntreStrings(String s1, String s2);
 short EExterno(TipoArvore p);
-TipoArvore CriaNoInt(int i, TipoArvore *Esq, TipoArvore *Dir, char CaractereRecebido);
-TipoArvore CriaNoExt(String k);
-void Pesquisa(String k, TipoArvore t);
-TipoArvore InsereEntre(String k, TipoArvore *t, short i);
-TipoArvore Insere(String k, TipoArvore *t);
-void printNo(TipoArvore no);
-void ImprimePatriciaOrdem(TipoArvore ap);
+void InicializaPatricia(TipoArvore* arvoreInicial);
+TipoArvore CriaNoInt(int indice,char caractereDif, TipoArvore *Esq,  TipoArvore *Dir);
+TipoArvore InserePatricia(String palavra, TipoArvore *t);
+int Bit(int i, String k, char referencia);
+TipoArvore InsereEntre(String k, TipoArvore *t, int i);
+void ImprimePatriciaEmOrdem(TipoArvore arvore);
+TipoArvore getPesquisaPalavra(String palavra, TipoArvore t);
+void PesquisaPrintPatricia(String palavra, TipoArvore t);
 
 
 #endif
