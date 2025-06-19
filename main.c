@@ -35,7 +35,7 @@ int main() {
     InicializaPatricia(&ArvoreInicial);
 
     // Abre o arquivo "entrada.txt"
-    arquivo = fopen("entrada.txt", "r");
+    arquivo = fopen("palavras5000.txt", "r");
 
     if (arquivo == NULL) {
         perror("Erro ao abrir o arquivo");
@@ -49,7 +49,7 @@ int main() {
         char *token = strtok(linha, " ");
         while (token != NULL && i < MAX_PALAVRAS) {
             // Only copy words with more than 3 characters
-            if (strlen(token) > 0) {
+            if (strlen(token) > 3) {
                 strncpy(palavras[i], token, TAM_PALAVRA - 1);
                 palavras[i][TAM_PALAVRA - 1] = '\0'; // Garante terminação
                 i++;
@@ -67,7 +67,7 @@ int main() {
     printf("Palavras encontradas (com mais de 3 caracteres):\n");
     for (int j = 0; j < i; j++) {
         printf("palavras[%d] = %s\n", j, palavras[j]);
-        ArvoreInicial = InserePatricia(palavras[j],&ArvoreInicial);
+        ArvoreInicial = InserePatricia(palavras[j],&ArvoreInicial, 1);
     }
     char pesq[50];
     for(int i = 0;i<5;i++){

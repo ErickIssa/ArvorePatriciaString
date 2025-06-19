@@ -75,20 +75,24 @@ TipoArvore CriaNoInt(int indice, char caractereDif, TipoArvore *Esq, TipoArvore 
     return p;
 }
 
-TipoArvore CriaNoExt(String palavra) {
+TipoArvore CriaNoExt(String palavra, int IDdocumento) {
     TipoArvore p = (TipoArvore)malloc(sizeof(TipoPatNo));
     p->nt = Externo;
     strcpy(p->NO.Chave, palavra);
-    //FLVaziaEncadeada(&p->NO.ocorrenciasPalavra);
+    p->chaveExt.ocorrenciasPalavra.Primeiro = NULL;
+    p->chaveExt.ocorrenciasPalavra.Ultimo = NULL;
+
+    FLVaziaEncadeada(&p->chaveExt.ocorrenciasPalavra);
+    InsereEncadeada(1,&p->chaveExt.ocorrenciasPalavra);
     return p;
 }
 
 // chamar essa funcao para inserir
-TipoArvore InserePatricia(String palavra, TipoArvore *t) {
+TipoArvore InserePatricia(String palavra, TipoArvore *t, int IDdocumento) {
     TipoArvore p;
     int i;
     if (*t == NULL) { //se vazia, ja cria no externo
-        return CriaNoExt(palavra);
+        return CriaNoExt(palavra, IDdocumento);
     } else {
         p = *t;
         while (!EExterno(p)) { //esse while utiliza de BIT para decidir qual lado da arvore vai
@@ -99,20 +103,22 @@ TipoArvore InserePatricia(String palavra, TipoArvore *t) {
         }
         i = PosicaoQueDifere(palavra, p->NO.Chave);    // calcula posição que difere
         if (i == -1) { // se i = -1 ja ta na arvore
-            printf("Erro: palavra '%s' já está na árvore\n", palavra);
+            printf("A palavra '%s' já está na árvore\n", palavra);
+            InsereEncadeada(IDdocumento,&p->chaveExt.ocorrenciasPalavra);
+            printf("%d, %d\n", p->chaveExt.ocorrenciasPalavra.Ultimo->idDoc,p->chaveExt.ocorrenciasPalavra.Ultimo->numeroOcorrencias);
             return *t;
         } else {
-            return InsereEntre(palavra, t, i); //else ele insere entre o no atual e a palavra
+            return InsereEntre(palavra, t, i, IDdocumento); //else ele insere entre o no atual e a palavra
         }
     }
 }
 
 // essa funcao insere entre os nos, NAO CHAMAR ELA
-TipoArvore InsereEntre(String k, TipoArvore *t, int i) {
+TipoArvore InsereEntre(String k, TipoArvore *t, int i, int IDdocumento) {
     TipoArvore p;
 
     if (EExterno(*t)) {
-        p = CriaNoExt(k);
+        p = CriaNoExt(k, IDdocumento);
         char letraRef = MaiorLetraEntreStrings(k, (*t)->NO.Chave); // determina letra no interno compara a do no atual e a que ta chegando
 
         if (Bit(i, k, letraRef) == 1)//usa BIT para ver pra qual lado vai
@@ -121,10 +127,14 @@ TipoArvore InsereEntre(String k, TipoArvore *t, int i) {
             return CriaNoInt(i, letraRef, &p, t);
     }
     else if (i < (*t)->NO.NInterno.Index) { //caso onde a divergencia acontece antes do no atual
-        p = CriaNoExt(k);
+        p = CriaNoExt(k, IDdocumento);
         TipoArvore temp = *t;
         while (!EExterno(temp)) {
-            temp = temp->NO.NInterno.Esq ? temp->NO.NInterno.Esq : temp->NO.NInterno.Dir;
+            if (temp->NO.NInterno.Esq != NULL) {
+                temp = temp->NO.NInterno.Esq;
+            } else {
+                temp = temp->NO.NInterno.Dir;
+            }
         }
         char letraRef = MaiorLetraEntreStrings(k, temp->NO.Chave);
 
@@ -137,9 +147,9 @@ TipoArvore InsereEntre(String k, TipoArvore *t, int i) {
         int idx = (*t)->NO.NInterno.Index;
         char letraRef = (*t)->NO.NInterno.caractere;
         if (Bit(idx, k, letraRef) == 1)
-            (*t)->NO.NInterno.Dir = InsereEntre(k, &(*t)->NO.NInterno.Dir, i);
+            (*t)->NO.NInterno.Dir = InsereEntre(k, &(*t)->NO.NInterno.Dir, i, IDdocumento);
         else
-            (*t)->NO.NInterno.Esq = InsereEntre(k, &(*t)->NO.NInterno.Esq, i);
+            (*t)->NO.NInterno.Esq = InsereEntre(k, &(*t)->NO.NInterno.Esq, i,IDdocumento);
         return (*t);
     }
 }
@@ -168,7 +178,7 @@ TipoArvore getPesquisaPalavra(String palavra, TipoArvore t) {
     if (strcmp(palavra, p->NO.Chave) == 0) {
         return p;  // Encontrou
     } else {
-        return NULL;  // Não encontrado
+        return NULL;  // Nao encontrado
     }
 }
 
@@ -185,50 +195,13 @@ void PesquisaPrintPatricia(String palavra, TipoArvore t) {
     }
     if (strcmp(palavra, p->NO.Chave) == 0) {
         printf("A palavra [%s] foi encontrada\n", p->NO.Chave);
-        if(VerificaVaziaEncadeada){
+        if(VerificaVaziaEncadeada(p->chaveExt.ocorrenciasPalavra) == 0){
           printf("listaVAzas\n");
         }
         else{
-          ImprimeEncadeada(p->NO.ocorrenciasPalavra);
+          ImprimeEncadeada(p->chaveExt.ocorrenciasPalavra);
         }
     } else {
-         printf("Palavra não encontrada\n");  
+         printf("Palavra nao encontrada\n");  
     }
 }
-
-//LISTA ENCADEADA DA PATRICA PARA AS OCORRENCIAS DO INDICE INVERTIDO
-
-void FLVaziaEncadeada(TipoLista *Lista) {
-    Lista->Primeiro = (ApontadorIndice) malloc(sizeof(CelulaOcorrencias));
-    if (Lista->Primeiro == NULL) {
-        printf("Erro ao alocar memória para a célula cabeça.\n");
-        exit(1);
-    }
-    Lista->Ultimo = Lista->Primeiro;
-    Lista->Primeiro->Prox = NULL;
-}
-
-int VerificaVaziaEncadeada(TipoLista Lista) {
-    return (Lista.Primeiro->Prox == NULL);
-}
-
-void InsereEncadeada(int idoc, int nmrOcorrencias, TipoLista *Lista) {
-    Lista->Ultimo->Prox = (ApontadorIndice) malloc(sizeof(CelulaOcorrencias));
-    if (Lista->Ultimo->Prox == NULL) {
-        printf("Erro ao alocar memória para o novo nó.\n");
-        exit(1);
-    }
-    Lista->Ultimo = Lista->Ultimo->Prox;
-    Lista->Ultimo->idDoc = idoc;
-    Lista->Ultimo->numeroOcorrencias = nmrOcorrencias;
-    Lista->Ultimo->Prox = NULL;
-}
-
-void ImprimeEncadeada(TipoLista Lista) {
-    ApontadorIndice Aux = Lista.Primeiro->Prox;
-    while (Aux != NULL) {
-        printf("Id: %d // qntd: %d\n", Aux->idDoc, Aux->numeroOcorrencias);
-        Aux = Aux->Prox;
-    }
-}
-

@@ -4,31 +4,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ocorrencias.h"
+
 #define D 15
 #define TAM_MAX 50
-//struct lista ENCADEADEADA DE OCORRENCIAS
-typedef struct CelulaOcorrencias *ApontadorIndice;
-typedef struct CelulaOcorrencias{
-  int numeroOcorrencias;
-  int idDoc;
-  ApontadorIndice Prox;
-}CelulaOcorrencias;
-
-typedef struct {
-  ApontadorIndice Primeiro, Ultimo;
-} TipoLista;
-
-
-void FLVaziaEncadeada(TipoLista *Lista);
-int VerificaVaziaEncadeada(TipoLista Lista);
-void InsereEncadeada(int idoc,int nmrOcorrencias, TipoLista *Lista);
-void ImprimeEncadeada(TipoLista Lista);
 
 //STRUCTS DA PATRICIA
 typedef char String[TAM_MAX];
 typedef short boolean;
 
 typedef enum { Interno, Externo } TipoDoNo;
+
+typedef struct TipoChave
+{
+  String Chave;
+  TipoLista ocorrenciasPalavra; 
+}TipoChave;
+
+
 
 typedef struct TipoPatNo* TipoArvore;
 typedef struct TipoPatNo {
@@ -42,17 +35,20 @@ typedef struct TipoPatNo {
     String Chave;
     TipoLista ocorrenciasPalavra;         // palavra armazenada no nó externo
   } NO;
+  TipoChave chaveExt;
 } TipoPatNo;
+
 
 
 int PosicaoQueDifere(String s1, String s2);
 char MaiorLetraEntreStrings(String s1, String s2);
 short EExterno(TipoArvore p);
+TipoArvore CriaNoExt(String palavra, int IDdocumento);
 void InicializaPatricia(TipoArvore* arvoreInicial);
 TipoArvore CriaNoInt(int indice,char caractereDif, TipoArvore *Esq,  TipoArvore *Dir);
-TipoArvore InserePatricia(String palavra, TipoArvore *t);
+TipoArvore InserePatricia(String palavra, TipoArvore *t, int IDdocumento);
 int Bit(int i, String k, char referencia);
-TipoArvore InsereEntre(String k, TipoArvore *t, int i);
+TipoArvore InsereEntre(String k, TipoArvore *t, int i, int IDdocumento);
 void ImprimePatriciaEmOrdem(TipoArvore arvore);
 TipoArvore getPesquisaPalavra(String palavra, TipoArvore t);
 void PesquisaPrintPatricia(String palavra, TipoArvore t);
