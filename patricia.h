@@ -21,9 +21,8 @@ typedef struct TipoChave
   TipoLista ocorrenciasPalavra; 
 }TipoChave;
 
-
-
 typedef struct TipoPatNo* TipoArvore;
+
 typedef struct TipoPatNo {
   TipoDoNo nt;
   union {
@@ -32,10 +31,9 @@ typedef struct TipoPatNo {
       char caractere;     // caractere armazenado no nó interno (maior)
       TipoArvore Esq, Dir;
     } NInterno;
-    String Chave;
-    TipoLista ocorrenciasPalavra;         // palavra armazenada no nó externo
+     // palavra armazenada no nó externo
+    TipoChave chaveExt;
   } NO;
-  TipoChave chaveExt;
 } TipoPatNo;
 
 
@@ -53,5 +51,7 @@ void ImprimePatriciaEmOrdem(TipoArvore arvore);
 TipoArvore getPesquisaPalavra(String palavra, TipoArvore t);
 void PesquisaPrintPatricia(String palavra, TipoArvore t);
 
+int QtdPalOcorenciaPatricia(TipoArvore arvore, String palavra);
+int OcorrenciasPorDoc(TipoArvore arvore, String palavra, int idDoc);
 
 #endif

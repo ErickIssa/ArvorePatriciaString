@@ -24,4 +24,5 @@ int VerificaVaziaEncadeada(TipoLista Lista);
 void InsereEncadeada(int idoc, TipoLista *Lista);
 void ImprimeEncadeada(TipoLista Lista);
 
+
 #endif

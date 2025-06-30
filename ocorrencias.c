@@ -31,28 +31,39 @@ int VerificaVaziaEncadeada(TipoLista Lista) {
 }
 
 void InsereEncadeada(int idoc, TipoLista *Lista) {
-    ApontadorIndice aux = Lista->Primeiro->Prox;
+    ApontadorIndice ant = Lista->Primeiro;
+    ApontadorIndice atual = Lista->Primeiro->Prox;
 
-    // verifica se o idDoc já existe
-    while (aux != NULL) {
-        if (aux->idDoc == idoc) {
-            aux->numeroOcorrencias += 1;
-            return;
-        }
-        aux = aux->Prox;
+    // Percorre até achar o ponto de inserção (id maior ou igual)
+    while (atual != NULL && atual->idDoc < idoc) {
+        ant = atual;
+        atual = atual->Prox;
     }
-    // se nao cria novo nó
-    Lista->Ultimo->Prox = (ApontadorIndice) malloc(sizeof(CelulaOcorrencias));
-    if (Lista->Ultimo->Prox == NULL) {
-        printf("Erro MALOC\n");
+
+    // Se já existe, incrementa
+    if (atual != NULL && atual->idDoc == idoc) {
+        atual->numeroOcorrencias += 1;
+        return;
+    }
+
+    // Cria novo nó
+    ApontadorIndice novo = (ApontadorIndice) malloc(sizeof(CelulaOcorrencias));
+    if (novo == NULL) {
+        printf("Erro MALLOC\n");
         exit(1);
     }
-    Lista->Ultimo = Lista->Ultimo->Prox;
-    Lista->Ultimo->idDoc = idoc;
-    Lista->Ultimo->numeroOcorrencias = 1;
-    Lista->Ultimo->Prox = NULL;
-}
+    novo->idDoc = idoc;
+    novo->numeroOcorrencias = 1;
+    novo->Prox = atual;
 
+    // Insere na lista
+    ant->Prox = novo;
+
+    // Atualiza ponteiro de último se inseriu no final
+    if (novo->Prox == NULL) {
+        Lista->Ultimo = novo;
+    }
+}
 
 void ImprimeEncadeada(TipoLista Lista) {
     if (Lista.Primeiro == NULL) {
@@ -65,7 +76,7 @@ void ImprimeEncadeada(TipoLista Lista) {
         return;
     }
     while (Aux != NULL) {
-        printf("Id: %d // qntd: %d\n", Aux->idDoc, Aux->numeroOcorrencias);
+        printf("<Id: %d // qntd: %d> ", Aux->idDoc, Aux->numeroOcorrencias);
         Aux = Aux->Prox;
     }
 }
